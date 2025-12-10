@@ -28,14 +28,14 @@ variable "key_name" {
   default     = "deployer-key"
 }
 
-variable "public_key_path" {
-  description = "The path to the public key file for SSH access"
+variable "aws_pub_key_content" {
+  description = "The raw string content of the public key."
   type        = string
-  default     = "~/.ssh/id_rsa_project_demo.pub"
+  # No default needed, as it will be provided by Jenkins
 }
 
-variable "private_key_path" {
-  description = "The path to the private key file for SSH access"
+variable "aws_private_key_content" {
+  description = "The raw string content of the private key."
   type        = string
-  default     = "~/.ssh/id_rsa_project_demo"
+  # No default needed, as it will be provided by Jenkins
 }
