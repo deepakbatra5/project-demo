@@ -86,7 +86,7 @@ pipeline {
         }
         stage('Validate Destroy') {
             input {
-                message "Do you want to destroy?"
+                message "Do you want to destroy??"
                 ok "Destroy"
             }
             steps {
