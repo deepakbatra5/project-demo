@@ -36,7 +36,7 @@ pipeline {
         stage('Terraform Provisioning') {
             steps {
                 script {
-                    sh 'terraform apply -auto-approve -var-file=$(env.BRANCH_NAME).tfvars'
+                    sh 'terraform apply -auto-approve -var-file=${env.BRANCH_NAME}.tfvars'
 
                     // 1. Extract Public IP Address of the provisioned instance
                     env.INSTANCE_IP = sh(
@@ -83,11 +83,19 @@ pipeline {
                 echo 'Ansible approved'
             }
         }
-        stage('Ansible Configuration') {
+        stage('Ansible Configuration and Testing') {
             steps {
                 // Now you can proceed directly to Ansible, knowing SSH is almost certainly ready.
                 ansiblePlaybook(
                     playbook: 'playbooks/grafana.yml',
+                    inventory: 'dynamic_inventory.ini', 
+                    credentialsId: SSH_CRED_ID, // Key is securely injected by the plugin here
+                )
+            }
+            steps {
+                // Now you can proceed directly to Ansible, knowing SSH is almost certainly ready.
+                ansiblePlaybook(
+                    playbook: 'playbooks/test-grafana.yml',
                     inventory: 'dynamic_inventory.ini', 
                     credentialsId: SSH_CRED_ID, // Key is securely injected by the plugin here
                 )
@@ -116,6 +124,9 @@ pipeline {
             echo 'Success!'
         }
         failure {
+            sh "terraform destroy -auto-approve -var-file=${env.BRANCH_NAME}.tfvars || echo \"Cleanup failed, please check manually.\""
+        }
+        aborted {
             sh "terraform destroy -auto-approve -var-file=${env.BRANCH_NAME}.tfvars || echo \"Cleanup failed, please check manually.\""
         }
     }
